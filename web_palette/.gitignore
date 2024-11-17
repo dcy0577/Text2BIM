@@ -1,0 +1,10 @@
+.DS_Store
+*.xcuserstate
+*.xcsettings
+Output/*
+*.user
+*.pdb
+*.vs
+xcuserdata
+*.xcworkspace
+*.lnk

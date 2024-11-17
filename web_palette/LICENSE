@@ -1,0 +1,102 @@
+VECTORWORKS, INC. (“VECTORWORKS”)
+SOFTWARE DEVELOPER'S KIT ("SDK") LICENSE AGREEMENT
+
+NOTICE TO USER: PLEASE READ THIS CONTRACT CAREFULLY. BY USING ALL OR ANY PORTION OF THE SDK YOU ACCEPT ALL THE TERMS AND CONDITIONS OF THIS LICENSE AGREEMENT, INCLUDING, IN PARTICULAR THE LIMITATIONS ON: USE CONTAINED IN SECTIONS 2, 3 AND 4; WARRANTY IN SECTION 7; AND LIABILITY IN SECTION 8. YOU AGREE THAT THIS LICENSE AGREEMENT IS ENFORCEABLE LIKE ANY WRITTEN NEGOTIATED AGREEMENT SIGNED BY YOU. IF YOU DO NOT AGREE, DO NOT USE THIS SDK. IF YOU ACQUIRED THE SDK ON TANGIBLE MEDIA (FOR EXAMPLE, DVD-ROM) WITHOUT AN OPPORTUNITY TO REVIEW THIS LICENSE, AND YOU DO NOT ACCEPT THIS LICENSE AGREEMENT, YOU MAY NOT USE THE SDK.
+
+1.1.	DEFINITIONS
+"SDK" means all of the contents of the files, DVD-ROM(s) or other media with which this License Agreement is provided, including but not limited to (i) Sample Code; (ii) Header File Information; (iii) Redistributable Code, (iv) Documentation; and (v) any upgrades, modified versions, updates, and/or additions thereto, if any, provided to You by Vectorworks, Inc.  "Sample Code" means sample software in source code format designated in the Documentation as "Sample Code." "Header File Information" means any header files (*.h files) supplied in connection with the SDK, including without limitation any related information detailing contents of header files. "Redistributable Code" means certain object code files designated in the Documentation as "Redistributable Code." "Documentation" means explanatory materials supplied with the SDK or made available online on Vectorworks public web pages related to the SDK.  "Vectorworks" means Vectorworks, Inc., a Maryland corporation, 7150 Riverwood Drive, Columbia, MD 21046 USA.
+
+"Vectorworks Software" means the generally commercially available versions of Vectorworks software: Architect, Landmark, Spotlight, Designer and Renderworks. "Developer Programs" means Your application programs that are designed to function with Vectorworks Software products.  "Developer," "You," and "Your" refer to any person or entity accessing or using this SDK, or any component thereof. "End User License Agreement" means an end user license agreement that provides a (a) limited, nonexclusive right to use the subject Developer Program with no further right to reproduce (except for archival and/or backup copies permitted by law) and/or distribute the subject Developer Program, (b) prohibition against distributing, selling, sublicensing, renting, loaning or leasing the subject Developer Program, (c) prohibition against reverse engineering, decompiling, disassembling or otherwise attempting to discover the source code of the subject Developer Program that is substantially similar to that set forth in Section 3 below, (d) statement that You and your suppliers retain all right, title and interest in the subject Developer Program that is substantially similar to that set forth as Section 5 below, (e) statement that Your suppliers disclaim all warranties, conditions, representations or terms with respect to the subject Developer Program substantially similar to the disclaimer set forth as Section 8 below, and (f) limit of liability substantially similar to that set forth as Section 9 below for the benefit of Your suppliers.
+
+1.2.	LICENSE
+1.	Subject to the terms and conditions of this License Agreement, Vectorworks grants You a non-exclusive, nontransferable, royalty-free license to (a) use the SDK for the sole purpose of internally developing Developer Programs, (b) reproduce and modify Sample Code as a component of Developer Programs that add significant and primary functionality to the Sample Code, (c) reproduce Redistributable Code solely as a component of Developer Programs that add significant and primary functionality to the Redistributable Code and (d) distribute Sample Code and/or Redistributable Code in object code form only as a component of Developer Programs that add significant and primary functionality to the Sample Code and/or Redistributable Code provided that (i) You distribute such object code under the terms and conditions of an End User License Agreement, (ii) You include a copyright notice reflecting the copyright ownership of Developer in such Developer Programs, (iii) You shall be solely responsible to Your customers for any update or support obligation or other liability which may arise from such distribution, (iv) You shall not make any statements that Your Developer Product is "certified," or that its performance is guaranteed, by Vectorworks, and (v) You do not use Vectorworks’ name or trademarks to market Your Developer Product without written permission of Vectorworks. Any modified or merged portion of the Sample Code, and/or merged portion of the Redistributable Code, IS subject to this License Agreement. Use of Vectorworks Software and/or any other Vectorworks application program is subject to the applicable end user license agreement for such application software even if such Vectorworks Software is supplied to You in connection with this License Agreement. You may make a limited number of copies of the Documentation to be used by Your employees or consultants for internal development purposes and not for general business purposes or for distribution by any means, and such employees or consultants shall be subject to this License Agreement. You may distribute Vectorworks Software with Your Developer Programs only under separate license from Vectorworks.
+Vectorworks is under no obligation to provide any support under this License Agreement, including upgrades or future versions of the SDK, Vectorworks Software and/or any component thereof, to Developer, end users, or to any other party. Further developer support, software licensing, trademark licensing and trademark usage information is available through www.vectorworks.net.
+
+
+1.3.	RESTRICTIONS
+Except for the limited distribution rights as provided in Section 2 above with respect to Sample Code and Redistributable Code, You may not distribute, sell, sublicense, rent, loan, or lease the SDK, Vectorworks Software, and/or any component thereof to any third party. You also agree not to add or delete any program files that would modify the functionality and/or appearance of Vectorworks Software and/or any component thereof. You agree not to reverse engineer, decompile, disassemble or otherwise attempt to discover the source code of the SDK, Vectorworks Software and/or any component thereof except to the extent (i) you may be expressly permitted to decompile under applicable law, (ii) it is essential to do so in order to achieve operability of the SDK or Vectorworks Software with another software program, and (iii) you have first requested Vectorworks to provide the information necessary to achieve such operability and Vectorworks has not made such information available. Vectorworks has the right to impose reasonable conditions and to request a reasonable fee before providing such information. Any information supplied by Vectorworks or obtained by you, as permitted hereunder, may only be used by you for the purpose described herein and may not be disclosed to any third party or used to create any software
+which is substantially similar to the expression of the SDK and/or Vectorworks Software.
+
+In addition, You agree that You will not use the SDK to do any of the following: (a) remove the menu item that calls up the "About Screen" in any Vectorworks Software product, other product incorporating Vectorworks Software under valid license from Vectorworks, or any component thereof; (b) alter, obscure or cause not to appear the “Splash Screen” dialog that displays while the program is launching (c) create or develop any program or software that exposes and/or discloses Header File Information (d) develop any software which is able to operate without the presence of Vectorworks Software.
+
+1.4.	CONFIDENTIAL INFORMATION
+You agree not to disseminate or in any way disclose Header File Information to any person, firm or business except for Your employees who need to know such Header File Information and who have previously agreed to be bound by a confidentiality obligation consistent with the obligation set forth in this Section 4. Further, You agree to treat the Header File Information with the same degree of care as You accord to Your own confidential information, but in any event no less than reasonable care. Your obligations under this section with respect to the Header File Information shall terminate when You can document that such Header File Information was (i) in the public domain at or subsequent to the time it was communicated to You by Vectorworks through no fault of yours, (ii) developed by Your employees or agents independently of and without reference to any information communicated to You by Vectorworks; or (iii) disclosed in response to a valid order by a court or other governmental body, as otherwise required by law, or as necessary to establish the rights of either party under this License Agreement.
+
+1.5.	PROPRIETARY RIGHTS
+You agree to protect Vectorworks' copyright and other ownership interests in all items in this SDK. You agree that all copies of items in this SDK reproduced for any reason by You will contain the same copyright, trademark, and other proprietary notices as appropriate and appear on or in the master items delivered by Vectorworks in this SDK. Vectorworks retains all right, title and ownership throughout the world in the intellectual property embodied within the SDK. Except as stated herein, this License Agreement does not grant You any rights to patents, copyrights, trade secrets, trademarks, or any other rights in respect to the items in this SDK.
+
+1.6.	TERM
+This License Agreement is effective until terminated. Vectorworks has the right to terminate Your License immediately if You fail to comply with any term of this License Agreement. Upon any such termination, You must (a) return all full and partial copies of the items in this SDK immediately to Vectorworks and
+(b) discontinue distribution of any Sample Code and/or Redistributable Code. Sections 1, 3, 4, 5, 6, 8, 9, 10, 12 and 13 shall survive any termination and/or expiration of this License Agreement.
+
+1.7.	DISTRIBUTION OF DEVELOPER PROGRAMS AND PROVISION OF SAMPLES If You distribute Developer Programs to a third party, You must have a signed
+license agreement with Vectorworks prior to distribution.  You also agree to provide Vectorworks with one copy of each Developer Program
+developed with the SDK within four (4) weeks of the initial distribution, in the full product packaging as sold to customers with a license for use, for the purpose of monitoring Developer’s compliance with the terms of this agreement. Developer Programs used ONLY by You are not subject to this requirement. Samples and the signed license agreement should be sent to Vectorworks, Inc., Chief Technology Officer, 7150 Riverwood Drive Columbia, MD 21046 USA.
+
+1.8.	DISCLAIMER OF WARRANTY
+Vectorworks licenses the SDK to You on an "AS IS" basis and without warranty of any kind. VECTORWORKS AND ITS SUPPLIERS DO NOT AND CANNOT WARRANT THE PERFORMANCE OR RESULTS YOU MAY OBTAIN BY USING THE SDK. EXCEPT FOR ANY WARRANTY, CONDITION, REPRESENTATION OR TERM TO THE EXTENT TO WHICH THE SAME CANNOT OR MAY NOT BE EXCLUDED OR LIMITED BY LAW APPLICABLE TO YOU IN YOUR JURISDICTION, VECTORWORKS AND ITS SUPPLIERS MAKE NO WARRANTIES, CONDITIONS, REPRESENTATIONS OR TERMS, EXPRESS OR IMPLIED, WHETHER BY STATUTE, COMMON LAW, CUSTOM, USAGE OR OTHERWISE AS TO THE SDK OR ANY COMPONENT THEREOF, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT OF THIRD PARTY RIGHTS, INTEGRATION, MERCHANTABILITY, SATISFACTORY QUALITY
+OR FITNESS FOR ANY PARTICULAR PURPOSE. Some states or provinces do not allow the exclusion of implied warranties so the above limitations may not apply to You.
+You may have rights that vary from jurisdiction to jurisdiction.
+
+1.9.	LIMITATION OF LIABILITY
+IN NO EVENT WILL Vectorworks OR ITS SUPPLIERS BE LIABLE TO YOU FOR ANY DAMAGES, CLAIMS OR COSTS WHATSOEVER ARISING FROM THIS LICENSE AGREEMENT AND/OR YOUR USE OF THE SDK OR ANY COMPONENT THEREOF, INCLUDING WITHOUT LIMITATION ANY CONSEQUENTIAL, INDIRECT, INCIDENTAL DAMAGES, OR ANY LOST PROFITS OR LOST SAVINGS, EVEN IF A
+VECTORWORKS REPRESENTATIVE HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH LOSS, DAMAGES, CLAIMS OR COSTS OR FOR ANY CLAIM BY ANY THIRD PARTY. THE FOREGOING LIMITATIONS AND EXCLUSIONS APPLY TO THE EXTENT PERMITTED BY APPLICABLE LAW IN YOUR JURISDICTION. VECTORWORKS' AGGREGATE LIABILITY AND THAT OF ITS SUPPLIERS UNDER OR IN CONNECTION WITH THIS LICENSE AGREEMENT SHALL BE LIMITED TO FIFTY U.S.
+DOLLARS ($50.00). Nothing contained in this License Agreement limits Vectorworks' liability to You in the event of death or personal injury resulting from Vectorworks' negligence or for the tort of deceit (fraud). Vectorworks is acting on behalf of its suppliers for the purpose of disclaiming, excluding and/or limiting obligations, warranties and liability as provided in this License Agreement, but in no other respects and for no other purpose.
+
+1.10.	INDEMNIFICATION
+You agree to defend, indemnify, and hold Vectorworks and its suppliers harmless from and against any claims or lawsuits, including attorneys' reasonable fees, that arise or result from the use or distribution of Developer Programs, provided that Vectorworks gives You prompt written notice of any such claim, tenders to You the defense or settlement of such a claim at Your expense, and cooperates with You, at Your expense, in defending or settling such claim.
+
+1.11.	GOVERNMENT REGULATIONS
+You agree that any Developer Program that includes Sample Code and/or Redistributable Code (i) will include in its license agreement a reference to applicable
+U.S. Government regulations which control licensing of software and (ii) will not be shipped, transferred, or exported into any country or used in any manner prohibited by the United States Export Administration Act or any other export laws, restrictions or regulations (collectively the "Export Laws"). In addition, if any part of the SDK is identified as export controlled items under the Export Laws, you represent and warrant that you are not a citizen, or otherwise located within, an embargoed nation (including without limitation Iran, Iraq, Syria, Sudan, Libya, Cuba, North Korea and Serbia) and that you are not otherwise prohibited under the Export Laws from receiving the SDK.	All rights to use the SDK are granted on condition that such rights are forfeited if you fail to comply with the terms of this License Agreement.
+
+1.12.	GOVERNING LAW.
+This License Agreement will be governed by and construed in accordance with the substantive laws in force in the State of Maryland. This License Agreement will not be governed by the conflict of law rules of any jurisdiction or the United Nations Convention on Contracts for the International Sale of Goods, the application of which is expressly excluded.
+
+1.13.	GENERAL
+You may not assign Your rights or obligations granted under this License Agreement without the prior written consent of Vectorworks. None of the provisions of this License Agreement shall be deemed to have been waived by any act or acquiescence on the part of Vectorworks, its agents, or employees, but only by an instrument in writing signed by an authorized signatory of Vectorworks. It is expressly agreed that a breach of Section 3 or 4 of this License Agreement will cause irreparable harm to Vectorworks and that a remedy at law will be inadequate. Therefore, in addition to any and all remedies available at law, Vectorworks will be entitled to seek an injunction or other equitable remedies in all legal proceedings in the event of any threatened or actual violation thereof. When conflicting language exists between this License Agreement and any other agreement included in this SDK this License Agreement shall supersede. If either Vectorworks or Developer employs attorneys to enforce any rights arising out of or relating to this License Agreement, the prevailing party shall be entitled to recover reasonable attorneys' fees. You acknowledge that You have read this License Agreement, understand it, and that it is the complete and exclusive statement of Your agreement with Vectorworks which supersedes any prior agreement, oral or written, between Vectorworks and You with respect to the licensing to You of this SDK. No variation of the terms of this License Agreement will be enforceable against Vectorworks unless Vectorworks gives its express consent in a writing signed by an authorized signatory of Vectorworks.
+
+
+Please fill out the section below if you plan to distribute SDK-derived programs outside of your company.  Please return it to the following address:
+
+Vectorworks, Inc.
+Chief Technology Officer 
+7150 Riverwood Drive
+Columbia, MD 21046 USA
+
+I agree to all terms and conditions set forth in the VECTORWORKS, Inc. (“Vectorworks”) SOFTWARE DEVELOPER'S KIT ("SDK") LICENSE AGREEMENT 090910 for the products listed below.
+
+ 
+LICENSEE
+  Signature: 	____________________________________________
+  Name: 	    ____________________________________________
+  Title: 	    ____________________________________________
+  Company: 	  ____________________________________________
+  Date: 	    ____________________________________________
+  
+VECTORWORKS
+  Signature: 	____________________________________________
+  Name: 	    ____________________________________________
+  Title: 	    ____________________________________________
+  Company: 	  ____________________________________________
+  Date: 	    ____________________________________________
+
+PRODUCTS
+  Product Name: ______________________________________________________________________
+  Brief Product Description (in English): ____________________________________________
+  ____________________________________________________________________________________
+
+  Product Name: ______________________________________________________________________
+  Brief Product Description (in English): ____________________________________________
+  ____________________________________________________________________________________
+
+ 
+
+
+ 
+
+
+ 
+
+
+ 

@@ -1,0 +1,27 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+<batch name="Open Batch" default="root">
+    
+    <target name="root">
+	
+        <openmodel file="C:\Users\ge25yak\Desktop\Text2BIM\tool_agent\solibri_data\LLM-checking-FullExample.smc" />
+			
+		<updatemodel file="C:\Users\ge25yak\Desktop\Text2BIM\tool_agent\Ifc_test_data\sample_model.ifc" with="C:\Users\ge25yak\Desktop\Text2BIM\tool_agent\Ifc_test_data\prompt_4508c609-62de-4379-bd39-668042d1b177.ifc" />
+			
+        
+			
+		
+			
+		<check />
+		
+        <autocomment zoom="TRUE" />
+		
+		
+		<updatepresentation />
+		
+		<bcfreport file="C:\Users\ge25yak\Desktop\Text2BIM\tool_agent\solibri_data\autorun_issues.bcfzip" version="2" />
+
+		
+		<exit /> 
+		
+    </target>
+</batch>

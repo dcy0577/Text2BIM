@@ -1,0 +1,23 @@
+1. I want to build a two-story hotel with eight rooms on each floor. The rooms are arranged in groups of four on each side, separated by a 4-meter-wide corridor in the middle. Each room has a door and a window. The doors of the rooms are on the corridor side of the wall, and the windows are on the outside wall of the building. The building should have a wooden pitched roof and brick walls.
+
+2. I want to build an office building. I want the building to have 3 floors and the layout of each floor to be the same. Each floor has 6 rooms, 3 on each side, separated by a 3 meter wide corridor. Each room has a door and a window. The door to each room should be on the wall on one side of the corridor and the window should be on the outside wall of the building.
+
+3. Create a basic 3D model of a four-story residential house with dimensions of 5 by 3 meters.
+
+4. Create a single-story residential house with a total floor area of 120 square meters. Include three bedrooms, two bathrooms, a kitchen, and a living room. The house should have a wooden pitched roof, and incorporate at least four windows and one main entrance door. Use the concrete walls.
+
+5. Create a building with three connected sections. Each section should be a rectangle (10m x 5m) with walls of 3 meters in height. The sections should be connected by 5-meter-long walls. Add slabs and a continuous, concrete pitched roof that covers all sections. Add doors and windows to each section. Choose the right material for the wall.  
+
+6. Create an 3-story L-shaped house with each leg of the L being 8 meters long and 4 meters wide. Place a door at the corner of the L and a window on each side of the L. I want the whole building to be made of wood.
+
+7. Design a building with a complex polygonal footprint (e.g., hexagonal). Each side of the hexagon should be 5 meters. Add a slab for the floor and a pitched roof. Include a door on one side and a window on each of the other sides.
+
+8. Construct a residential building with a rectangular footprint (15m x 10m), a pitched roof and two floors. Create balconies by extending the floor slab outwards from the exterior walls on the first floor. Add doors and windows to each floor. Make sure that the balconies are accessible from the inside.
+
+9. Construct a modern office building with a rectangular base of 20 meters by 20 meters. Set the wall height to 3 meters. Include four rooms (5x5 meters each) along the perimeter, with a central open space. Add doors and windows to each room and a main entrance door to the building. 
+
+10. Design a two-story apartment building with an H-shapped base. Each floor consists of two apartments with two rooms each.
+
+11. Create a T-shaped, single-story building with a horizontal section of 10 meters x 30 meters and a vertical section of 10 meters x 20 meters. Connect the two sections by placing a door at their junction. Each section has three windows. The entire building is made of concrete.
+
+12. Design a three-story apartment building with two apartments per floor arranged symmetrically. Each apartment should have a main entrance door, a living room, a kitchen, two bedrooms and a bathroom. Use interior walls to separate the two apartments and the rooms within each apartment. Add a central staircase connecting all floors. The doors of each apartment should open to the central staircase.
