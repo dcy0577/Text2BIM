@@ -6,7 +6,12 @@ https://www.arxiv.org/abs/2408.08054
 
 ![Method](method.png)
 
-The `tool_agent` folder contains the Python implementation of the multi-agent framework. The `web_palette` folder contains the C++ plugin, which allows the framework to be used via the UI in Vectorworks. Please note that the `web_palette` folder is covered by a different license/agreement. All experiments are done in a Windows PC.
+The `tool_agent` folder contains the Python implementation of the multi-agent framework. The `web_palette` folder contains the C++ plugin, which allows the framework to be used via the UI in Vectorworks. 
+
+Please note that the `web_palette` folder is covered by a different license/agreement. All experiments are done in a Windows PC.
+
+![demo](demo.gif)
+
 
 ## Getting start
 0. You need to have Vectorworks 2024 and Solibri Office installed in your PC (also need valid license to use both software).
