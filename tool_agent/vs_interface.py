@@ -28,9 +28,9 @@ class DebugServer:
 
 # Below are the endpoints functions that will be excuted by the web palette backend
 
+DEBUG = False
 def excute_webpalette_po_coder(input_str, chat_history):
     # debug attach
-    DEBUG = True
     if DEBUG:
         DebugServer.getInstance()
 
@@ -41,7 +41,6 @@ def excute_webpalette_po_coder(input_str, chat_history):
 
 def excute_webpalette_export(output_str, issue_fixing_counter, chat_history, query):
     # debug attach
-    DEBUG = True
     if DEBUG:
         DebugServer.getInstance()
 
@@ -53,7 +52,6 @@ def excute_webpalette_export(output_str, issue_fixing_counter, chat_history, que
 
 def excute_webpalette_checking_loop(issue_fixing_counter, original_code_result, code_result, file_name):
     # debug attach
-    DEBUG = True
     if DEBUG:
         server = DebugServer.getInstance()
     code_result = code_result.replace("\\n", "\n")
@@ -64,7 +62,6 @@ def excute_webpalette_checking_loop(issue_fixing_counter, original_code_result, 
 
 def excute_final_ifc_export(output_str, issue_fixing_counter):
     # debug attach
-    DEBUG = True
     if DEBUG:
         server = DebugServer.getInstance()
     output_str = output_str.replace("\\n", "\n")
@@ -74,7 +71,6 @@ def excute_final_ifc_export(output_str, issue_fixing_counter):
 
 def excute_pure_checking(file_name, issue_fixing_counter):
     # debug attach
-    DEBUG = True
     if DEBUG:
         server = DebugServer.getInstance()
     pure_checking(str(file_name), int(issue_fixing_counter))
@@ -84,3 +80,53 @@ def excute_state_clean():
     with open(STATE_PATH, "w") as f:
         f.write("{}")
 
+
+# BUG: This is not working with IFC output in Vectorworks as the geometry is not ready before output!
+def faceless_execution(msg="Construct a residential building with a rectangular footprint (15m x 10m), a pitched roof and two floors. Create balconies by extending the floor slab outwards from the exterior walls on the first floor. Add doors and windows to each floor. Make sure that the balconies are accessible from the inside.", 
+                       history="User: "):
+    """
+    BUG: This doesnt work with ifc output. as the geometry are not ready before output!
+    """
+    # Initial processing
+    output_str, code_result = excute_webpalette_po_coder(msg, history)
+    # final_output = output_str
+    
+    # Issue fixing loop (max 3 iterations)
+    issue_fixing_counter = 0
+    fix_code = code_result
+    
+    while issue_fixing_counter < 3:
+        # Export step
+        file_name = excute_webpalette_export(
+            output_str, issue_fixing_counter, history, msg
+        )
+        
+        if file_name in ("break", "", None):
+            break
+            
+        # Checking loop step
+        current_code = code_result if issue_fixing_counter == 0 else fix_code
+        output_str2, fix_code = excute_webpalette_checking_loop(
+            issue_fixing_counter, code_result, current_code, file_name
+        )
+        
+        if output_str2 in ("break", "", None):
+            break
+            
+        # Update for next iteration
+        issue_fixing_counter += 1
+        # final_output += output_str2
+    
+    # Final processing if all 3 iterations completed
+    if issue_fixing_counter == 3:
+        file_name_final = excute_final_ifc_export(output_str2, issue_fixing_counter)
+        
+        if file_name_final not in ("break", "", None):
+            excute_pure_checking(file_name_final, issue_fixing_counter)
+    
+    excute_state_clean()
+
+    final_output = "Execution completed successfully. Please check the output files and logs for details."
+    vs.AlrtDialog(final_output)
+    
+    # return final_output

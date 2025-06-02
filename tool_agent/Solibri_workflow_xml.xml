@@ -3,9 +3,9 @@
     
     <target name="root">
 	
-        <openmodel file="C:\Users\ge25yak\Desktop\Text2BIM\tool_agent\solibri_data\LLM-checking-FullExample.smc" />
+        <openmodel file="C:\Users\dell\Desktop\Text2BIM\tool_agent\solibri_data\LLM-checking-FullExample.smc" />
 			
-		<updatemodel file="C:\Users\ge25yak\Desktop\Text2BIM\tool_agent\Ifc_test_data\sample_model.ifc" with="C:\Users\ge25yak\Desktop\Text2BIM\tool_agent\Ifc_test_data\prompt_4508c609-62de-4379-bd39-668042d1b177.ifc" />
+		<updatemodel file="C:\Users\dell\Desktop\Text2BIM\tool_agent\Ifc_test_data\sample_model.ifc" with="C:\Users\dell\Desktop\Text2BIM\tool_agent\Ifc_test_data\claude\Prompt_NR.13\4\prompt_70c3caa0-a24f-43ef-8346-8bd63a0078fd.ifc" />
 			
         
 			
@@ -18,7 +18,7 @@
 		
 		<updatepresentation />
 		
-		<bcfreport file="C:\Users\ge25yak\Desktop\Text2BIM\tool_agent\solibri_data\autorun_issues.bcfzip" version="2" />
+		<bcfreport file="C:\Users\dell\Desktop\Text2BIM\tool_agent\solibri_data\autorun_issues.bcfzip" version="2" />
 
 		
 		<exit /> 

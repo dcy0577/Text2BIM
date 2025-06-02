@@ -1,6 +1,8 @@
 import os
+import re
 import shutil
 import subprocess
+from collections import Counter
 from xml.dom import minidom
 import xml.etree.ElementTree as ET
 import zipfile
@@ -36,6 +38,37 @@ def set_xml_path(workflow_path,
     
     tree.write(workflow_path, encoding="ISO-8859-1", xml_declaration=True)
 
+def extract_issue_descriptions(text):
+    """
+    extract Issue description, and count the number of unique types and their occurrences.
+    Args:
+        text (str): issue text from Solibri report, should be a string containing multiple issue descriptions.
+
+    """
+    if not text or not isinstance(text, str):
+        return {
+            'total_issues': 0,
+            'unique_types': 0,
+            'type_counts': {}
+        }
+    
+    pattern = r'Issue description:\s*([^\n\r]+?)(?=\s*(?:\n|$))'
+    
+    descriptions = re.findall(pattern, text)
+    
+    valid_descriptions = []
+    for desc in descriptions:
+        cleaned_desc = desc.strip()
+        if cleaned_desc and not cleaned_desc.startswith('Issue description:'):
+            valid_descriptions.append(cleaned_desc)
+    
+    description_counts = Counter(valid_descriptions)
+    
+    return {
+        'total_issues': len(valid_descriptions),
+        'unique_types': len(description_counts),
+        'type_counts': dict(description_counts)
+    }
 
 def check_model(workflow_path, solibri_path=r"C:\Program Files\Solibri\SOLIBRI\Solibri.exe"):
     # Run Solibri Model Checker
@@ -50,6 +83,8 @@ def process_bcf_report(bcf_report_path, new_ifc_path):
     """
     # overall issue string
     issues_sum = ""
+
+    issue_count = 0
     
     # unzip the bcf report
     with zipfile.ZipFile(bcf_report_path, 'r') as zip_ref:
@@ -82,5 +117,7 @@ def process_bcf_report(bcf_report_path, new_ifc_path):
                     uuids.append(uuid)
                 # usually viewpoint file is after the issue file, so this works
                 issues_sum += issue_template.format(title, description, uuids)
+                issue_count += 1
     print(issues_sum)
-    return issues_sum
+    issue_types_info_dict = extract_issue_descriptions(issues_sum)
+    return issues_sum, issue_count, issue_types_info_dict

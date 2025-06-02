@@ -10,5 +10,5 @@ Issues in the generated buildings:
 API documentation:
 <<all_tools>>
 
-Please provide your guidance below as a reviewer. Use millimeter units. Think step by step. Avoid duplicating or directly modifying the programmer's original code, as it has been already executed. Instead, suggest code patches to fix it.
+Please provide your guidance below as a reviewer. Use millimeter units. Think step by step. Avoid duplicating or directly modifying the programmer's original code, as it has been already executed. Instead, suggest separated code patches to fix it. Don't let the programmer repeat code that has already been executed, as this will cause a lot of duplication in the model and lead to more issues.
 Reviewer: 

@@ -215,57 +215,212 @@ def test_llm_code():
 
 def test_llm_code_custom_interpreter():
 	code = """
-# Step 1: Create Story Layers
-ground_floor_uuid = create_story_layer(layer_name="Ground Floor", elevation=0, floor_index=1)
-first_floor_uuid = create_story_layer(layer_name="First Floor", elevation=3000, floor_index=2)
-roof_layer_uuid = create_story_layer(layer_name="Roof", elevation=6000, floor_index=3)
 
-# Step 2: Create Ground Floor Walls
+# Phase 1: Setup & Ground Floor
+
+# 1. Story Layers
+ground_floor_layer_uuid = create_story_layer(layer_name="Ground Floor", elevation=0, floor_index=1)
+first_floor_layer_uuid = create_story_layer(layer_name="First Floor", elevation=3000, floor_index=2)
+roof_layer_uuid = create_story_layer(layer_name="Roof Layer", elevation=6000, floor_index=3)
 set_active_story_layer(layer_name="Ground Floor")
 
-wall1_uuid = create_wall(st_pt=(0, 0), ed_pt=(5000, 0), layer_uuid=ground_floor_uuid)
-wall2_uuid = create_wall(st_pt=(5000, 0), ed_pt=(5000, 3000), layer_uuid=ground_floor_uuid)
-wall3_uuid = create_wall(st_pt=(5000, 3000), ed_pt=(0, 3000), layer_uuid=ground_floor_uuid)
-wall4_uuid = create_wall(st_pt=(0, 3000), ed_pt=(0, 0), layer_uuid=ground_floor_uuid)
+# 2. Ground Floor Slab
+gf_slab_poly_vertices = [(0,0), (15000,0), (15000,10000), (0,10000)]
+gf_slab_poly_uuid = create_polygon(vertices=gf_slab_poly_vertices, layer_uuid=ground_floor_layer_uuid)
+gf_slab_uuid = create_slab(profile_id=gf_slab_poly_uuid, layer_uuid=ground_floor_layer_uuid)
+set_slab_height(slab_id=gf_slab_uuid, height=0)
+set_slab_style(slab_id=gf_slab_uuid, style_name="Generic Concrete Slab") # Assuming "Generic Concrete Slab" is a valid style
 
-# for wall_uuid in [wall1_uuid, wall2_uuid, wall3_uuid, wall4_uuid]:
-#     set_wall_style(uuid=wall_uuid, style_name="Exterior Concrete Wall")
-#     set_wall_thickness(uuid=wall_uuid, thickness=200)
+# 3. Ground Floor Functional Areas
+entrance_hall_vertices = [(0,0), (2500,0), (2500,4000), (0,4000)]
+fa_entrance_hall_uuid = create_functional_area(vertices=entrance_hall_vertices, name="Entrance Hall", layer_uuid=ground_floor_layer_uuid)
 
-# Step 3: Add Doors and Windows to Ground Floor Walls
-add_door_to_wall(wall_uuid=wall1_uuid, door_elevation=0, door_offset=1000, door_name="Main Door")
-add_window_to_wall(wall_uuid=wall2_uuid, window_elevation=1000, window_offset=1000, window_name="Window 1")
-add_window_to_wall(wall_uuid=wall3_uuid, window_elevation=1000, window_offset=1000, window_name="Window 2")
+wc_vertices = [(0,4000), (2500,4000), (2500,6000), (0,6000)]
+fa_wc_uuid = create_functional_area(vertices=wc_vertices, name="WC", layer_uuid=ground_floor_layer_uuid)
 
-# Step 4: Create Ground Floor Slab
-polygon_uuid = create_polygon(vertices=[(0, 0), (5000, 0), (5000, 3000), (0, 3000)], layer_uuid=ground_floor_uuid)
-slab_uuid = create_slab(profile_id=polygon_uuid, layer_uuid=ground_floor_uuid)
-set_slab_height(slab_id=slab_uuid, height=300)
+living_room_vertices = [(2500,0), (9000,0), (9000,6000), (2500,6000)]
+fa_living_room_uuid = create_functional_area(vertices=living_room_vertices, name="Living Room", layer_uuid=ground_floor_layer_uuid)
 
-# Step 5: Create First Floor Walls
-# set_active_story_layer(layer_name="First Floor")
+kitchen_dining_vertices = [(9000,0), (15000,0), (15000,6000), (9000,6000)]
+fa_kitchen_dining_uuid = create_functional_area(vertices=kitchen_dining_vertices, name="Kitchen/Dining", layer_uuid=ground_floor_layer_uuid)
 
-duplicated_wall_uuids = duplicate_obj(element_uuid=[wall1_uuid, wall2_uuid, wall3_uuid, wall4_uuid], layer_uuid=first_floor_uuid, n=1)
+staircase_area_vertices = [(0,6000), (3000,6000), (3000,10000), (0,10000)]
+fa_staircase_area_uuid = create_functional_area(vertices=staircase_area_vertices, name="Staircase Area", layer_uuid=ground_floor_layer_uuid)
 
-for wall_uuid in duplicated_wall_uuids:
-    set_wall_elevation(uuid=wall_uuid, top_elevation=3000, bottom_elevation=0)
+utility_room_vertices = [(3000,6000), (7500,6000), (7500,10000), (3000,10000)]
+fa_utility_room_uuid = create_functional_area(vertices=utility_room_vertices, name="Utility Room", layer_uuid=ground_floor_layer_uuid)
 
-# # Step 6: Add Doors and Windows to First Floor Walls
-# add_door_to_wall(wall_uuid=duplicated_wall_uuids[0], door_elevation=0, door_offset=1000, door_name="Balcony Door")
-# add_window_to_wall(wall_uuid=duplicated_wall_uuids[1], window_elevation=1000, window_offset=1000, window_name="Window 3")
-# add_window_to_wall(wall_uuid=duplicated_wall_uuids[2], window_elevation=1000, window_offset=1000, window_name="Window 4")
+study_office_vertices = [(7500,6000), (15000,6000), (15000,10000), (7500,10000)]
+fa_study_office_uuid = create_functional_area(vertices=study_office_vertices, name="Study/Office", layer_uuid=ground_floor_layer_uuid)
 
-# # Step 7: Create First Floor Slab
-# polygon_uuid = create_polygon(vertices=[(0, 0), (5000, 0), (5000, 3000), (0, 3000)], layer_uuid=first_floor_uuid)
-# slab_uuid = create_slab(profile_id=polygon_uuid, layer_uuid=first_floor_uuid)
-# set_slab_height(slab_id=slab_uuid, height=300)
+# 4. Ground Floor Walls
+# Perimeter Walls
+wall_A_gf_uuid = create_wall(st_pt=(0,0), ed_pt=(15000,0), layer_uuid=ground_floor_layer_uuid)
+set_wall_thickness(uuid=wall_A_gf_uuid, thickness=200)
+set_wall_style(uuid=wall_A_gf_uuid, style_name="Exterior Concrete Wall")
 
-# # Step 8: Create Roof
-# set_active_story_layer(layer_name="Roof")
+wall_B_gf_uuid = create_wall(st_pt=(15000,0), ed_pt=(15000,10000), layer_uuid=ground_floor_layer_uuid)
+set_wall_thickness(uuid=wall_B_gf_uuid, thickness=200)
+set_wall_style(uuid=wall_B_gf_uuid, style_name="Exterior Concrete Wall")
 
-# polygon_uuid = create_polygon(vertices=[(0, 0), (5000, 0), (5000, 3000), (0, 3000)], layer_uuid=roof_layer_uuid)
-# roof_uuid = create_pitched_roof(profile_id=polygon_uuid, layer_uuid=roof_layer_uuid, slope=30, eave_overhang=500, eave_height=3000, roof_thickness=200)
-# set_pitched_roof_style(roof_id=roof_uuid, style_name="Sloped Wood Struct Insul Flat Clay Tile")
+wall_C_gf_uuid = create_wall(st_pt=(15000,10000), ed_pt=(0,10000), layer_uuid=ground_floor_layer_uuid)
+set_wall_thickness(uuid=wall_C_gf_uuid, thickness=200)
+set_wall_style(uuid=wall_C_gf_uuid, style_name="Exterior Concrete Wall")
+
+wall_D_gf_uuid = create_wall(st_pt=(0,10000), ed_pt=(0,0), layer_uuid=ground_floor_layer_uuid)
+set_wall_thickness(uuid=wall_D_gf_uuid, thickness=200)
+set_wall_style(uuid=wall_D_gf_uuid, style_name="Exterior Concrete Wall")
+
+# Internal Walls
+wall_G1_gf_uuid = create_wall(st_pt=(2500,0), ed_pt=(2500,4000), layer_uuid=ground_floor_layer_uuid)
+set_wall_thickness(uuid=wall_G1_gf_uuid, thickness=100)
+set_wall_style(uuid=wall_G1_gf_uuid, style_name="Interior Concrete Wall")
+
+wall_G2_gf_uuid = create_wall(st_pt=(0,4000), ed_pt=(2500,4000), layer_uuid=ground_floor_layer_uuid)
+set_wall_thickness(uuid=wall_G2_gf_uuid, thickness=100)
+set_wall_style(uuid=wall_G2_gf_uuid, style_name="Interior Concrete Wall")
+
+wall_G3_gf_uuid = create_wall(st_pt=(2500,4000), ed_pt=(2500,6000), layer_uuid=ground_floor_layer_uuid)
+set_wall_thickness(uuid=wall_G3_gf_uuid, thickness=100)
+set_wall_style(uuid=wall_G3_gf_uuid, style_name="Interior Concrete Wall")
+
+wall_G4_gf_uuid = create_wall(st_pt=(9000,0), ed_pt=(9000,6000), layer_uuid=ground_floor_layer_uuid)
+set_wall_thickness(uuid=wall_G4_gf_uuid, thickness=100)
+set_wall_style(uuid=wall_G4_gf_uuid, style_name="Interior Concrete Wall")
+
+wall_G5_gf_uuid = create_wall(st_pt=(0,6000), ed_pt=(15000,6000), layer_uuid=ground_floor_layer_uuid)
+set_wall_thickness(uuid=wall_G5_gf_uuid, thickness=100)
+set_wall_style(uuid=wall_G5_gf_uuid, style_name="Interior Concrete Wall")
+
+wall_G6_gf_uuid = create_wall(st_pt=(3000,6000), ed_pt=(3000,10000), layer_uuid=ground_floor_layer_uuid)
+set_wall_thickness(uuid=wall_G6_gf_uuid, thickness=100)
+set_wall_style(uuid=wall_G6_gf_uuid, style_name="Interior Concrete Wall")
+
+wall_G7_gf_uuid = create_wall(st_pt=(7500,6000), ed_pt=(7500,10000), layer_uuid=ground_floor_layer_uuid)
+set_wall_thickness(uuid=wall_G7_gf_uuid, thickness=100)
+set_wall_style(uuid=wall_G7_gf_uuid, style_name="Interior Concrete Wall")
+
+# 5. Ground Floor Doors
+door_gf1_uuid = add_door_to_wall(wall_uuid=wall_A_gf_uuid, door_elevation=0, door_offset=1000, door_name="Standard Door")
+door_gf2_uuid = add_door_to_wall(wall_uuid=wall_G2_gf_uuid, door_elevation=0, door_offset=1250, door_name="Standard Door")
+door_gf3_uuid = add_door_to_wall(wall_uuid=wall_G1_gf_uuid, door_elevation=0, door_offset=1000, door_name="Standard Door") # Offset from (2500,0)
+door_gf4_uuid = add_door_to_wall(wall_uuid=wall_G4_gf_uuid, door_elevation=0, door_offset=2500, door_name="Standard Door") # Offset from (9000,0)
+door_gf5_uuid = add_door_to_wall(wall_uuid=wall_G5_gf_uuid, door_elevation=0, door_offset=1000, door_name="Standard Door") # Offset from (0,6000)
+door_gf6_uuid = add_door_to_wall(wall_uuid=wall_G6_gf_uuid, door_elevation=0, door_offset=1000, door_name="Standard Door") # Offset from (3000,6000)
+door_gf7_uuid = add_door_to_wall(wall_uuid=wall_G5_gf_uuid, door_elevation=0, door_offset=8500, door_name="Standard Door") # Offset from (0,6000)
+
+# 6. Ground Floor Windows
+window_gf1_uuid = add_window_to_wall(wall_uuid=wall_A_gf_uuid, window_elevation=900, window_offset=4500, window_name="Standard Window")
+window_gf2_uuid = add_window_to_wall(wall_uuid=wall_A_gf_uuid, window_elevation=900, window_offset=10500, window_name="Standard Window")
+window_gf3_uuid = add_window_to_wall(wall_uuid=wall_B_gf_uuid, window_elevation=900, window_offset=2000, window_name="Standard Window")
+window_gf4_uuid = add_window_to_wall(wall_uuid=wall_D_gf_uuid, window_elevation=900, window_offset=4700, window_name="Standard Window") # Wall D (0,10000) to (0,0)
+window_gf5_uuid = add_window_to_wall(wall_uuid=wall_C_gf_uuid, window_elevation=900, window_offset=9000, window_name="Standard Window") # Wall C (15000,10000) to (0,10000)
+window_gf6_uuid = add_window_to_wall(wall_uuid=wall_C_gf_uuid, window_elevation=900, window_offset=2500, window_name="Standard Window") # Wall C (15000,10000) to (0,10000)
+window_gf7_uuid = add_window_to_wall(wall_uuid=wall_B_gf_uuid, window_elevation=900, window_offset=7000, window_name="Standard Window")
+
+# Phase 2: First Floor
+
+# 1. Set "First Floor" as active layer.
+set_active_story_layer(layer_name="First Floor")
+
+# 2. First Floor Slab (with Balconies)
+ff_main_slab_poly_vertices = [(0,0), (15000,0), (15000,10000), (0,10000)]
+ff_main_slab_poly_uuid = create_polygon(vertices=ff_main_slab_poly_vertices, layer_uuid=first_floor_layer_uuid)
+ff_main_slab_uuid = create_slab(profile_id=ff_main_slab_poly_uuid, layer_uuid=first_floor_layer_uuid)
+set_slab_height(slab_id=ff_main_slab_uuid, height=0)
+set_slab_style(slab_id=ff_main_slab_uuid, style_name="Generic Concrete Slab")
+
+ff_front_balcony_poly_vertices = [(0,-1500), (15000,-1500), (15000,0), (0,0)]
+ff_front_balcony_poly_uuid = create_polygon(vertices=ff_front_balcony_poly_vertices, layer_uuid=first_floor_layer_uuid)
+ff_front_balcony_slab_uuid = create_slab(profile_id=ff_front_balcony_poly_uuid, layer_uuid=first_floor_layer_uuid)
+set_slab_height(slab_id=ff_front_balcony_slab_uuid, height=0)
+set_slab_style(slab_id=ff_front_balcony_slab_uuid, style_name="Generic Concrete Slab")
+
+ff_rear_balcony_poly_vertices = [(0,10000), (15000,10000), (15000,11500), (0,11500)]
+ff_rear_balcony_poly_uuid = create_polygon(vertices=ff_rear_balcony_poly_vertices, layer_uuid=first_floor_layer_uuid)
+ff_rear_balcony_slab_uuid = create_slab(profile_id=ff_rear_balcony_poly_uuid, layer_uuid=first_floor_layer_uuid)
+set_slab_height(slab_id=ff_rear_balcony_slab_uuid, height=0)
+set_slab_style(slab_id=ff_rear_balcony_slab_uuid, style_name="Generic Concrete Slab")
+
+# 3. First Floor Functional Areas
+landing_corridor_vertices = [(0,6000), (15000,6000), (15000,7000), (0,7000)]
+fa_landing_corridor_uuid = create_functional_area(vertices=landing_corridor_vertices, name="Landing/Corridor", layer_uuid=first_floor_layer_uuid)
+
+master_bedroom_vertices = [(0,0), (7500,0), (7500,6000), (0,6000)]
+fa_master_bedroom_uuid = create_functional_area(vertices=master_bedroom_vertices, name="Master Bedroom", layer_uuid=first_floor_layer_uuid)
+
+ensuite_vertices = [(0,4500), (2500,4500), (2500,6000), (0,6000)] # Corrected based on wall F3a, F3b
+fa_ensuite_uuid = create_functional_area(vertices=ensuite_vertices, name="En-suite", layer_uuid=first_floor_layer_uuid)
+
+bedroom2_vertices = [(7500,0), (15000,0), (15000,6000), (7500,6000)]
+fa_bedroom2_uuid = create_functional_area(vertices=bedroom2_vertices, name="Bedroom 2", layer_uuid=first_floor_layer_uuid)
+
+family_bathroom_vertices = [(0,7000), (4000,7000), (4000,10000), (0,10000)]
+fa_family_bathroom_uuid = create_functional_area(vertices=family_bathroom_vertices, name="Family Bathroom", layer_uuid=first_floor_layer_uuid)
+
+bedroom3_vertices = [(4000,7000), (9500,7000), (9500,10000), (4000,10000)]
+fa_bedroom3_uuid = create_functional_area(vertices=bedroom3_vertices, name="Bedroom 3", layer_uuid=first_floor_layer_uuid)
+
+bedroom4_vertices = [(9500,7000), (15000,7000), (15000,10000), (9500,10000)]
+fa_bedroom4_uuid = create_functional_area(vertices=bedroom4_vertices, name="Bedroom 4", layer_uuid=first_floor_layer_uuid)
+
+# 4. First Floor Walls
+# Perimeter Walls
+wall_FA_ff_uuid = create_wall(st_pt=(0,0), ed_pt=(15000,0), layer_uuid=first_floor_layer_uuid)
+set_wall_thickness(uuid=wall_FA_ff_uuid, thickness=200)
+set_wall_style(uuid=wall_FA_ff_uuid, style_name="Exterior Concrete Wall")
+
+wall_FB_ff_uuid = create_wall(st_pt=(15000,0), ed_pt=(15000,10000), layer_uuid=first_floor_layer_uuid)
+set_wall_thickness(uuid=wall_FB_ff_uuid, thickness=200)
+set_wall_style(uuid=wall_FB_ff_uuid, style_name="Exterior Concrete Wall")
+
+wall_FC_ff_uuid = create_wall(st_pt=(15000,10000), ed_pt=(0,10000), layer_uuid=first_floor_layer_uuid)
+set_wall_thickness(uuid=wall_FC_ff_uuid, thickness=200)
+set_wall_style(uuid=wall_FC_ff_uuid, style_name="Exterior Concrete Wall")
+
+wall_FD_ff_uuid = create_wall(st_pt=(0,10000), ed_pt=(0,0), layer_uuid=first_floor_layer_uuid)
+set_wall_thickness(uuid=wall_FD_ff_uuid, thickness=200)
+set_wall_style(uuid=wall_FD_ff_uuid, style_name="Exterior Concrete Wall")
+
+# Internal Walls
+wall_F1_ff_uuid = create_wall(st_pt=(0,6000), ed_pt=(15000,6000), layer_uuid=first_floor_layer_uuid)
+set_wall_thickness(uuid=wall_F1_ff_uuid, thickness=100)
+set_wall_style(uuid=wall_F1_ff_uuid, style_name="Interior Concrete Wall")
+
+wall_F2_ff_uuid = create_wall(st_pt=(0,7000), ed_pt=(15000,7000), layer_uuid=first_floor_layer_uuid)
+set_wall_thickness(uuid=wall_F2_ff_uuid, thickness=100)
+set_wall_style(uuid=wall_F2_ff_uuid, style_name="Interior Concrete Wall")
+
+wall_F3a_ff_uuid = create_wall(st_pt=(0,4500), ed_pt=(2500,4500), layer_uuid=first_floor_layer_uuid)
+set_wall_thickness(uuid=wall_F3a_ff_uuid, thickness=100)
+set_wall_style(uuid=wall_F3a_ff_uuid, style_name="Interior Concrete Wall")
+
+wall_F3b_ff_uuid = create_wall(st_pt=(2500,4500), ed_pt=(2500,6000), layer_uuid=first_floor_layer_uuid)
+set_wall_thickness(uuid=wall_F3b_ff_uuid, thickness=100)
+set_wall_style(uuid=wall_F3b_ff_uuid, style_name="Interior Concrete Wall")
+
+wall_F4_ff_uuid = create_wall(st_pt=(7500,0), ed_pt=(7500,6000), layer_uuid=first_floor_layer_uuid)
+set_wall_thickness(uuid=wall_F4_ff_uuid, thickness=100)
+set_wall_style(uuid=wall_F4_ff_uuid, style_name="Interior Concrete Wall")
+
+wall_F5_ff_uuid = create_wall(st_pt=(4000,7000), ed_pt=(4000,10000), layer_uuid=first_floor_layer_uuid)
+set_wall_thickness(uuid=wall_F5_ff_uuid, thickness=100)
+set_wall_style(uuid=wall_F5_ff_uuid, style_name="Interior Concrete Wall")
+
+wall_F6_ff_uuid = create_wall(st_pt=(9500,7000), ed_pt=(9500,10000), layer_uuid=first_floor_layer_uuid)
+set_wall_thickness(uuid=wall_F6_ff_uuid, thickness=100)
+set_wall_style(uuid=wall_F6_ff_uuid, style_name="Interior Concrete Wall")
+
+wall_F7_ff_uuid = create_wall(st_pt=(3000,6000), ed_pt=(3000,7000), layer_uuid=first_floor_layer_uuid)
+set_wall_thickness(uuid=wall_F7_ff_uuid, thickness=100)
+set_wall_style(uuid=wall_F7_ff_uuid, style_name="Interior Concrete Wall")
+
+# 5. First Floor Doors
+door_ff1_uuid = add_door_to_wall(wall_uuid=wall_F1_ff_uuid, door_elevation=0, door_offset=3750, door_name="Standard Door") # Offset from (0,6000)
+door_ff2_uuid = add_door_to_wall(wall_uuid=wall_F3a_ff_uuid, door_elevation=0, door_offset=1250, door_name="Standard Door") # Offset from (0,4500)
+door_ff3_uuid = add_door_to_wall(wall_uuid=wall_F1_ff_uuid, door_elevation=0, door_offset=8500, door_name="Standard Door") # Offset from (0,6000)
+door_ff4_uuid = add_door_to_wall(wall_uuid=wall_F2_ff_uuid, door_elevation=0, door_offset=1000, door_name="Standard Door") # Offset from (0,7000)
+# door_ff5_uuid = add_door_to_wall(wall_uuid=wall_F2_ff_uuid, door_elevation=0, door_offset=5000, do
 
 """
 	tools = {}  

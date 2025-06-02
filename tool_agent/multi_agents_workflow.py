@@ -1,12 +1,14 @@
+from datetime import datetime
 import importlib
 import os
+import threading
 import uuid
 import dotenv
 import json
 
 import vs
 from tool_agent.utils import remove_last_human_message_with_regex, safe_encode
-from tool_agent.agents import OpenAiAgent, GeminiAgent, MistralAgent, PROJECT_ROOT
+from tool_agent.agents import ClaudeAgent, OpenAiAgent, GeminiAgent, MistralAgent, PROJECT_ROOT
 from tool_agent.solibri_checker import *
 import tool_agent.vw_tools_extend
 importlib.reload(tool_agent.vw_tools_extend)
@@ -24,7 +26,7 @@ REVIEWER_PROMPT_PATH = os.path.join(PROJECT_ROOT, "tool_agent", "muti_agent_prom
 STATE_PATH = os.path.join(PROJECT_ROOT, "data", "state.json")
 
 # config data/ifc output folder path
-OUTPUT_FOLDER_PATH = os.path.join(PROJECT_ROOT, "tool_agent", "Ifc_test_data")
+MAIN_OUTPUT_FOLDER_PATH = os.path.join(PROJECT_ROOT, "tool_agent", "Ifc_test_data")
 
 # config the solibri paths
 SOLIBRI_PATH = r"C:\Program Files\Solibri\SOLIBRI\Solibri.exe"
@@ -33,12 +35,46 @@ BCF_EXPORT_PATH= os.path.join(PROJECT_ROOT, "tool_agent", "solibri_data","autoru
 MUSTER_IFC_PATH = os.path.join(PROJECT_ROOT, "tool_agent", "Ifc_test_data", "sample_model.ifc")
 SOLIBRI_SMC_PATH = os.path.join(PROJECT_ROOT, "tool_agent", "solibri_data", "LLM-checking-FullExample.smc")
 
-# global variable holding the outputs from the agents
-output_sum = ''
+
+MODEL = "claude"  # default model, can be changed to "gpt", "gemini", "claude", "mistral"
+TASK_NUMBER = f"Prompt_NR.{1}"
+TASK_ROUND = "1"
+OUTPUT_FOLDER_PATH = os.path.join(MAIN_OUTPUT_FOLDER_PATH, MODEL, TASK_NUMBER, TASK_ROUND)
+if not os.path.exists(OUTPUT_FOLDER_PATH):
+    os.makedirs(OUTPUT_FOLDER_PATH)
+
+EXPERIMENT_LOG_PATH = os.path.join(PROJECT_ROOT, f"experiment_log_{MODEL}.json")
+
+
+
+# # global variable holding the outputs from the agents
+# output_sum = ''
+# def streamer(output):
+#     global output_sum
+#     output_sum = output_sum + output
+#     print(output)
+
+
+output_chunks = []
+output_lock = threading.Lock()
+
+# Replace your streamer function with:
 def streamer(output):
-    global output_sum
-    output_sum = output_sum + output
+    global output_chunks
+    with output_lock:
+        output_chunks.append(output)
     print(output)
+
+# Add helper functions:
+def get_output_sum():
+    with output_lock:
+        return ''.join(output_chunks)
+
+def clear_output():
+    global output_chunks
+    with output_lock:
+        output_chunks = []
+
 
 # init tools
 def init_vw_tools():
@@ -101,10 +137,81 @@ def init_vw_tools():
 
     return tool_list
 
+def log_experiment_data(model, task_number, task_round, 
+                       issue_fixing_counter=None, 
+                       issue_count=None, 
+                       issue_type_info_dict=None, 
+                       file_name=None,
+                       experiment_phase=None):
+    """
+    Log the experiment data to a file and keep updating it.
+    
+    Args:
+        model (str): The model used ("gpt", "gemini", "mistral", "claude")
+        task_number (str): Task number (e.g., "prompt_NR.11")
+        task_round (str): Task round (e.g., "1")
+        issue_fixing_counter (int, optional): Current iteration counter
+        issue_count (int, optional): Number of issues found
+        issue_type_info_dict (dict, optional): Issue type information
+        file_name (str, optional): Generated file name
+        experiment_phase (str, optional): Phase of experiment ("initial", "checking", "final")
+    """
+    
+    # Create experiment key
+    experiment_key = f"{model}_{task_number}_{task_round}"
+    
+    # Create log directory if not exists
+    log_dir = os.path.dirname(EXPERIMENT_LOG_PATH)
+    if not os.path.exists(log_dir):
+        os.makedirs(log_dir)
+    
+    # Load existing log data
+    if os.path.exists(EXPERIMENT_LOG_PATH):
+        try:
+            with open(EXPERIMENT_LOG_PATH, "r", encoding="utf-8") as f:
+                log_data = json.load(f)
+        except (json.JSONDecodeError, FileNotFoundError):
+            log_data = {}
+    else:
+        log_data = {}
+    
+    # Initialize experiment entry if doesn't exist
+    if experiment_key not in log_data:
+        log_data[experiment_key] = {
+            "model": model,
+            "task_number": task_number,
+            "task_round": task_round,
+            "created_at": datetime.now().isoformat(),
+            "iterations": []
+        }
+    
+    # Add iteration data
+    iteration_data = {
+        "timestamp": datetime.now().isoformat(),
+        "issue_fixing_counter": issue_fixing_counter,
+        "issue_count": issue_count,
+        "issue_type_info_dict": issue_type_info_dict,
+        "file_name": file_name,
+        "experiment_phase": experiment_phase
+    }
+    
+    # Remove None values
+    iteration_data = {k: v for k, v in iteration_data.items() if v is not None}
+    
+    log_data[experiment_key]["iterations"].append(iteration_data)
+    log_data[experiment_key]["last_updated"] = datetime.now().isoformat()
+    
+    # Save updated log data
+    with open(EXPERIMENT_LOG_PATH, "w", encoding="utf-8") as f:
+        json.dump(log_data, f, indent=2, ensure_ascii=False)
+    
+    print(f"Logged experiment data for {experiment_key}, iteration {issue_fixing_counter}")
+
+
 # function for user instruction->product owner(->architect)->programmer workflow 
 def run_po_coder_agents(query: str, 
                         chat_history_front_end: str, 
-                        model="gpt"): # model = "gpt" or "gemini" or "mistral"
+                        model=MODEL): # model = "gpt" or "gemini" or "mistral" or "claude"
     # init tools
     tool_list = init_vw_tools()
 
@@ -116,39 +223,49 @@ def run_po_coder_agents(query: str,
 
     if model == "gpt":
         agent_po = OpenAiAgent(
-            # model="gpt-4o",
-            model="gpt-4o-2024-05-13",
+            model="o4-mini-2025-04-16", # "gpt-4.1","o4-mini","gpt-4o-2024-05-13","o1-preview",o4-mini-2025-04-16
             chat_prompt_template=po_prompt_str,
             additional_tools=tool_list
         )
 
         agent_coder = OpenAiAgent(
-            model="o1-preview",
-            # model="gpt-4o-2024-05-13",
+            model="o4-mini-2025-04-16", # "gpt-4.1","o4-mini","gpt-4o-2024-05-13","o1-preview"
             chat_prompt_template=coder_prompt_str,
             additional_tools=tool_list
         )
     
     elif model == "gemini":
         agent_po = GeminiAgent(
-            model="gemini-1.5-pro",
+            model="gemini-2.5-pro-preview-05-06", # "gemini-2.5-pro-preview-05-06", "gemini-2.5-flash-preview-05-20"
             chat_prompt_template=po_prompt_str,
             additional_tools=tool_list
         )
         agent_coder = GeminiAgent(
-            model="gemini-1.5-pro",
+            model="gemini-2.5-pro-preview-05-06", # "gemini-2.5-pro-preview-05-06", "gemini-2.5-flash-preview-05-20"
             chat_prompt_template=coder_prompt_str,
             additional_tools=tool_list
         )
     
     elif model == "mistral":
         agent_po = MistralAgent(
-            model = "mistral-large-latest",
+            model = "mistral-medium-2505",
             chat_prompt_template=po_prompt_str,
             additional_tools=tool_list
         )
         agent_coder = MistralAgent(
-            model = "mistral-large-latest",
+            model = "mistral-medium-2505",
+            chat_prompt_template=coder_prompt_str,
+            additional_tools=tool_list
+        )
+    
+    elif model == "claude":
+        agent_po = ClaudeAgent(
+            model="claude-sonnet-4-20250514", # "claude-4-opus-20250514", "claude-sonnet-4-20250514"
+            chat_prompt_template=po_prompt_str,
+            additional_tools=tool_list
+        )
+        agent_coder = ClaudeAgent(
+            model="claude-sonnet-4-20250514", # "claude-4-opus-20250514", "claude-sonnet-4-20250514"
             chat_prompt_template=coder_prompt_str,
             additional_tools=tool_list
         )
@@ -182,7 +299,7 @@ def run_po_coder_agents(query: str,
     with open(state_path, "w") as f:
         json.dump(previous_state, f, default=safe_encode)
 
-
+    output_sum = get_output_sum()
     return output_sum, code_result
 
 # function for exporting the ifc file and agents' chat records to disk
@@ -211,6 +328,16 @@ def export_ifc_and_stuffs(output_sum: str, issue_fixing_counter: int, chat_histo
                 # also store the response data
                 with open(response_path, "w", encoding="utf-8") as f:
                     f.write(str(output_sum))
+                
+                # Log initial experiment data
+                log_experiment_data(
+                    model=MODEL,
+                    task_number=TASK_NUMBER,
+                    task_round=TASK_ROUND,
+                    issue_fixing_counter=issue_fixing_counter,
+                    file_name=file_name,
+                    experiment_phase="initial"
+                )
             else:
                 new_ifc_path = os.path.join(OUTPUT_FOLDER_PATH, f"{file_name}_checking_{issue_fixing_counter}.ifc")
                 issue_str_path = os.path.join(OUTPUT_FOLDER_PATH, f"{file_name}_checking_{issue_fixing_counter}.txt")
@@ -223,6 +350,11 @@ def export_ifc_and_stuffs(output_sum: str, issue_fixing_counter: int, chat_histo
             # it seems that the ifc export without ui is not working for automatic story mapping, so we use vs.IFC_ExportWithUI instead
             # remember to set the ifc path as file_name.ifc
             vs.IFC_ExportWithUI(False)
+            # also export the vw project file
+            project_file_path = os.path.join(OUTPUT_FOLDER_PATH, f"{new_ifc_path}.vwx")
+            vs.SaveActiveDocument(project_file_path)
+            if issue_fixing_counter < 3: # we will need the output_sum for the final export
+                clear_output()
             return file_name
     else:
         return "break"
@@ -232,7 +364,7 @@ def run_agent_checking_loop(issue_fixing_counter: int,
                             original_code_result: str, 
                             code_result: str, 
                             file_name: str,
-                            model="gpt"): # model = "gpt" or "gemini" or "mistral"
+                            model=MODEL): # model = "gpt" or "gemini" or "mistral" or "claude"
 
     # init tools
     tool_list = init_vw_tools()
@@ -245,38 +377,48 @@ def run_agent_checking_loop(issue_fixing_counter: int,
 
     if model == "gpt":
         agent_reviewer = OpenAiAgent(
-            model="o1-preview",
-            # model="gpt-4o-2024-05-13",
+            model="o4-mini-2025-04-16", # "gpt-4.1","o4-mini","gpt-4o-2024-05-13","o1-preview"
             chat_prompt_template=review_prompt_str,
             additional_tools=tool_list
         )
         agent_coder = OpenAiAgent(
-            model="o1-preview",
-            # model="gpt-4o-2024-05-13",
+            model="o4-mini-2025-04-16", # "gpt-4.1","o4-mini","gpt-4o-2024-05-13","o1-preview"
             chat_prompt_template=coder_prompt_str,
             additional_tools=tool_list
         )
     
     elif model == "gemini":
         agent_reviewer = GeminiAgent(
-            model="gemini-1.5-pro",
+            model="gemini-2.5-pro-preview-05-06", # "gemini-2.5-pro-preview-05-06", "gemini-2.5-flash-preview-05-20"
             chat_prompt_template=review_prompt_str,
             additional_tools=tool_list
         )
         agent_coder = GeminiAgent(
-            model="gemini-1.5-pro",
+            model="gemini-2.5-pro-preview-05-06", # "gemini-2.5-pro-preview-05-06", "gemini-2.5-flash-preview-05-20"
             chat_prompt_template=coder_prompt_str,
             additional_tools=tool_list
         )
     
     elif model == "mistral":
         agent_reviewer = MistralAgent(
-            model = "mistral-large-latest",
+            model = "mistral-medium-2505",
             chat_prompt_template=review_prompt_str,
             additional_tools=tool_list
         )
         agent_coder = MistralAgent(
-            model = "mistral-large-latest",
+            model = "mistral-medium-2505",
+            chat_prompt_template=coder_prompt_str,
+            additional_tools=tool_list
+        )
+    
+    elif model == "claude":
+        agent_reviewer = ClaudeAgent(
+            model="claude-sonnet-4-20250514", # "claude-4-opus-20250514", "claude-sonnet-4-20250514"
+            chat_prompt_template=review_prompt_str,
+            additional_tools=tool_list
+        )
+        agent_coder = ClaudeAgent(
+            model="claude-sonnet-4-20250514", # "claude-4-opus-20250514", "claude-sonnet-4-20250514"
             chat_prompt_template=coder_prompt_str,
             additional_tools=tool_list
         )
@@ -310,7 +452,20 @@ def run_agent_checking_loop(issue_fixing_counter: int,
                     new_ifc_path=new_ifc_path, 
                     bcf_export_path=bcf_export_path)
         check_model(workflow_path, solibri_path=SOLIBRI_PATH)
-        issue_str = process_bcf_report(bcf_export_path, new_ifc_path)
+        issue_str, issue_count, issue_type_info_dict = process_bcf_report(bcf_export_path, new_ifc_path)
+
+        # Log checking results
+        log_experiment_data(
+            model=model,
+            task_number=TASK_NUMBER,
+            task_round=TASK_ROUND,
+            issue_fixing_counter=issue_fixing_counter,
+            issue_count=issue_count,
+            issue_type_info_dict=issue_type_info_dict,
+            file_name=file_name,
+            experiment_phase="checking"
+        )
+
         # if no issues are found, we can stop the loop
         if issue_str == "":
             vs.AlrtDialog("No issues found! The model is compliant!")
@@ -329,13 +484,13 @@ def run_agent_checking_loop(issue_fixing_counter: int,
         # delete_all_in_model() # if we want to delete the previous generated building. BUT this will make the uuids of the elements in model change!!!
         
         local_chat_history = "" 
-        input_review_result = "The original Python code that generates the building with some issues: \n" + f"{original_code_result}" + "Please write a patch to solve the issues based on the review suggestions. You can reuse the variables defined in the original code, but DO NOT rewrite the original code." + "\n" + "Review suggestions: " + review_result
+        input_review_result = "The Python code that generates the building with some issues: \n" + f"{code_result}" + "Please write a patch to solve the issues based on the review suggestions. Do not write diff but a excutable python script in a code block. You can reuse the variables defined in the original code, but DO NOT rewrite the original code." + "\n" + "Review suggestions: " + review_result
 
         state, fix_code_result = agent_coder.chat(input_review_result, local_chat_history, **state, is_reviewing=True)
         # update the local chat history
         local_chat_history += "\n" + fix_code_result
         # update the code result by adding the fixing code
-        code_result += "\n" + "Previous code patch that has been executed: " + "\n" + fix_code_result
+        code_result += "\n" + "Previously executed code patch that attempted to fix the issues:" + "\n" + fix_code_result
 
         issue_str_path = os.path.join(OUTPUT_FOLDER_PATH, f"{file_name}_checking_{issue_fixing_counter}.txt")
         fixing_output_path = os.path.join(OUTPUT_FOLDER_PATH, f"{file_name}_checking_{issue_fixing_counter}_from_agents.txt")
@@ -347,6 +502,8 @@ def run_agent_checking_loop(issue_fixing_counter: int,
         with open(issue_str_path, "w", encoding="utf-8") as f:
             f.write(issue_str)
         
+        output_sum = get_output_sum()  # Get string when needed
+
         return output_sum, code_result
 
 # function for exporting the final ifc file and the checking results to disk  
@@ -372,6 +529,11 @@ def export_final_ifc_and_checks(output_sum: str, issue_fixing_counter: int):
             # it seems that the ifc export without ui is not working for automatic story mapping
             # remember to set the ifc path as file_name.ifc
             vs.IFC_ExportWithUI(False)
+            # also export the vw project file
+            project_file_path = os.path.join(OUTPUT_FOLDER_PATH, f"{file_name}_checking_{issue_fixing_counter}_final.vwx")
+            vs.SaveActiveDocument(project_file_path)
+
+            clear_output()
             return file_name
     else:
         return "break"
@@ -388,7 +550,19 @@ def pure_checking(file_name, issue_fixing_counter):
                 new_ifc_path=new_ifc_path, 
                 bcf_export_path=bcf_export_path)
     check_model(workflow_path, solibri_path=SOLIBRI_PATH)
-    issue_str = process_bcf_report(bcf_export_path, new_ifc_path)
+    issue_str, issue_count, issue_type_info_dict = process_bcf_report(bcf_export_path, new_ifc_path)
+
+     # Log final checking results
+    log_experiment_data(
+        model=MODEL,
+        task_number=TASK_NUMBER,
+        task_round=TASK_ROUND,
+        issue_fixing_counter=issue_fixing_counter,
+        issue_count=issue_count,
+        issue_type_info_dict=issue_type_info_dict,
+        file_name=file_name,
+        experiment_phase="final"
+    )
     # if no issues are found, we can stop the loop
     if issue_str == "":
         vs.AlrtDialog("No issues found! The model is compliant!")

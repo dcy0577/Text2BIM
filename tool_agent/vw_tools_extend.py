@@ -219,17 +219,20 @@ class SetWallHeight(Tool):
                 h  = vs.GetObjectByUuid(uuid)
             # this get is based on the ground layer
             overallHeightTop, overallHeightBottom = vs.GetWallOverallHeights(h)
-            # our input is relative to the current layer, so we need to convert the values to the ground layer
+
+            # here we try to set the wall height based on the current layer
             layer_h = vs.GetParent(h)
             base_eleva, thickness = vs.GetLayerElevation(layer_h)
-            top_elevation = top_elevation + base_eleva + thickness
-            bottom_elevation = bottom_elevation + base_eleva + thickness
+            overallHeightTop = overallHeightTop - base_eleva - thickness # current top elevation to current layer
+            overallHeightBottom = overallHeightBottom - base_eleva - thickness # current bottom elevation to current layer
             if top_elevation:
-                overallHeightTop = top_elevation
+                overallHeightTop = top_elevation # input are relative to the current layer
             if bottom_elevation:
-                overallHeightBottom = bottom_elevation
-            # this set is based on ground layer, because if we set ture in CreateDuplicateObjN, the wall offset will always refer to the ground layer 
-            vs.SetWallOverallHeights(h,0,0,"",overallHeightBottom,0,1,"",overallHeightTop)
+                overallHeightBottom = bottom_elevation # input are relative to the current layer
+            # vs.AlrtDialog("New top elevation: " + str(overallHeightTop) + " bottom elevation: " + str(overallHeightBottom))
+            # this set is based on ground layer, maybe because if we set ture in CreateDuplicateObjN, the wall offset will always refer to the ground layer 
+            # but actually this set is based on the current layer
+            vs.SetWallOverallHeights(h,0,0,"",overallHeightBottom,0,0,"",overallHeightTop)
             vs.ResetObject(h)
             return uuid
         except Exception as e:
@@ -510,7 +513,7 @@ class DeleteTool(Tool):
 class FindSelect(Tool):
     name = "find_selected_element"
     description= """
-    This tool is use to find the selected element in current active story layer in Vectorworks. If there are no selected elements found, it will return an empty list.
+    This tool is use to find the mouse selected element in current active story layer in Vectorworks. If there are no selected elements found, it will return an empty list.
     Input:
         - None
     Return:
@@ -689,10 +692,17 @@ class SetSlabHeight(Tool):
                 return roof_id
             # need to be careful with this
             # seems like the height is the height to the ground layer, not the story layer, so we need to convert it
-            layer_h = vs.GetParent(slab_h)
-            base_eleva, thickness = vs.GetLayerElevation(layer_h)
-            height = height + base_eleva + thickness
-            vs.SetSlabHeight(slab_h, height)
+            # layer_h = vs.GetParent(slab_h)
+            # base_eleva, thickness = vs.GetLayerElevation(layer_h)
+            ok, offset, rotationX, rotationY, rotationZ = vs.GetEntityMatrix(slab_h)
+            # original_elevation = vs.GetObjectVariableReal(slab_h, 174) # this is aquivalent to vs.GetSlabHeight, will however return 0 if the slab is paste on the corresponding layer
+            original_elevation_to_layer = offset[2] # this is the height of the slab relative to the story layer where the slab is now pasted
+            # vs.AlrtDialog(f"original_elevation_to_layer: {original_elevation_to_layer}")
+            height = height - original_elevation_to_layer
+            # height = height + base_eleva + thickness
+            # vs.SetSlabHeight(slab_h, height) # BUG! this is not working, so we use the SetEntityMatrix instead
+            new_offset =(offset[0], offset[1], height)  # set the height to the offset
+            vs.SetEntityMatrix(slab_h, new_offset, rotationX, rotationY, rotationZ)
             vs.ResetObject(slab_h)
             return slab_id
         except Exception as e:
@@ -716,12 +726,11 @@ class GetSlabHeight(Tool):
                 slab_h = vs.GetObjectByUuid(slab_id)
             if isinstance(slab_id, List):
                 slab_h = vs.GetObjectByUuid(slab_id[0])
-            # seems like this always return the base elevation of layer, didnt reflect the slab relative to the story layer 
-            # so we need to convert it
-            height = vs.GetSlabHeight(slab_h)
-            layer_h = vs.GetParent(slab_h)
-            base_eleva, thickness = vs.GetLayerElevation(layer_h)
-            height = height - base_eleva - thickness
+
+            # update: now we use the GetEntityMatrix to get the height
+            ok, offset, rotationX, rotationY, rotationZ = vs.GetEntityMatrix(slab_h)
+            # offset[2] is the height of the slab relative to the story layer where the slab is now pasted
+            height = offset[2]
             return height
         except Exception as e:
             raise ValueError(f"Error occured during getting slab height: {e}")
@@ -761,10 +770,11 @@ class SetSlabStyle(Tool):
 class DuplicateObj(Tool):
     name = "duplicate_obj"
     description = """
-    This tool is use to duplicate an element to a specified layer in Vectorworks. The copies are placed on the same position as the original element.
+    This tool is use to duplicate an element to a specified layer in Vectorworks. The relative position of the duplicate element within its layer is the same as that of the original element within its layer.
     Note that when duplicating a wall that includes doors and windows, the doors and windows within it will also be duplicated.
     It is not recommended to use this tool to duplicate doors and windows directly. It is preferable to first add the doors and windows to the wall, and then duplicate the wall.
-    The story layer cannot be duplicated.
+    Best practice is to use the element from the ground floor as dulication source, and then duplicate it to the target story layer.
+    The story layer cannot be duplicated. 
     Input:
         - element_uuid: str, the unique uuid of an element to duplicate.
         - layer_uuid: str, the uuid of the story layer where the copies will be placed.
@@ -783,28 +793,38 @@ class DuplicateObj(Tool):
                 obj = vs.GetObjectByUuid(element_uuid)
                 if obj != vs.Handle(0):
                     for i in range(n):
-                        if vs.GetTypeN(obj) == 31:
+                        # BUG: when triger the copy command fpr a wall via webpalette, the windows and doors within the walls will disappear. However, when run the script in the built-in script editor, it works fine. 
+                        # if vs.GetTypeN(obj) == 31:
+                        if vs.GetClass(obj) == "xxx": # (never used), this method will not work for wall with doors and windows
                             # set active layer
-                            layer_name = vs.GetLName(obj)
+                            layer_h = vs.GetLayer(obj)
+                            layer_name = vs.GetLName(layer_h)
+                            # set active layer
                             vs.Layer(layer_name)
                             vs.DSelectAll()
-                            vs.SelectAll()
+                            vs.SetSelect(obj)
                             vs.DoMenuTextByName('Copy', 0)
                             # switch to the target layer
                             vs.Layer(vs.GetLName(vs.GetObjectByUuid(layer_uuid)))
-                            vs.DoMenuTextByName('Paste In Place', 0)
+                            vs.DoMenuTextByName('Paste In Place', 0) 
+                            vs.ForEachObjectInLayer(vs.ResetObject, 0, 2, 0)
+                            hobj = vs.FSObject(vs.GetObjectByUuid(layer_uuid))
+                            obj_uuid = vs.GetObjectUuid(hobj)
+                            objs_uuid.append(obj_uuid)
                             vs.ForEachObjectInLayer(set_ifc_property_for_duplication, 2, 1, 0)
+                            vs.DSelectAll()
                         else:
                             if vs.GetClass(obj) == "Slabs":
                                 hobj = vs.CreateDuplicateObjN(obj, vs.GetObjectByUuid(layer_uuid), False)
                             else:
+                                # because of the BUG mentioned above, we need to do it this way
                                 hobj = vs.CreateDuplicateObjN(obj, vs.GetObjectByUuid(layer_uuid), True)
-                            
+                                vs.ResetObject(hobj)
                             obj_uuid = vs.GetObjectUuid(hobj)
                             objs_uuid.append(obj_uuid)
                             # add uuid to ifc
                             set_ifc_property_for_duplication(hobj)
-                    
+
             if isinstance(element_uuid, List):
                 for id in element_uuid:
                     obj = vs.GetObjectByUuid(id)
@@ -829,13 +849,10 @@ class DuplicateObj(Tool):
                                 obj_uuid = vs.GetObjectUuid(hobj)
                                 objs_uuid.append(obj_uuid)
                                 # add uuid to ifc
-                                set_ifc_property_for_duplication(hobj)
-                
-                
+                                set_ifc_property_for_duplication(hobj)                    
                 # elevation, thickness = vs.GetLayerElevation(vs.GetObjectByUuid(layer_uuid))
                 # vs.SetLayerElevation(vs.GetObjectByUuid(layer_uuid), 0, 0)
                 # vs.SetLayerElevation(vs.GetObjectByUuid(layer_uuid), elevation, 0)
-
 
             return objs_uuid
         except Exception as e:
@@ -948,50 +965,106 @@ class SetRoofAttributes(Tool):
         - roof_thickness: float, the thickness of the roof (optional).
     Return:
         - str, the uuid of the modified roof.
-"""
+    """
     inputs = ["text", "text", "text", "text", "text"]
     outputs = ["text"]
 
     def __call__(self, roof_id: str, slope: float = None, eave_overhang: float = None, eave_height: float = None, roof_thickness: float = None):
         try:
+            # Get roof handle
             if isinstance(roof_id, str):
                 roof_h = vs.GetObjectByUuid(roof_id)
-            if isinstance(roof_id, List):
+            elif isinstance(roof_id, List):
                 roof_h = vs.GetObjectByUuid(roof_id[0])
+            else:
+                raise ValueError(f"Invalid roof_id type: {type(roof_id)}")
+            
+            # Check if roof handle is valid
+            if not roof_h:
+                raise ValueError(f"Could not find roof object with ID: {roof_id}")
+            
+            # Get number of vertices
             ver_n = vs.GetRoofVertices(roof_h)
+            
+            # Check if roof has vertices
+            if ver_n <= 0:
+                raise ValueError(f"Roof has no vertices (ver_n = {ver_n})")
+            
             old_eaveHeight_original_list = []
+            
             for index in range(ver_n):
-                index = index + 1
-                bool, old_vertexPt, old_slope, old_overhang, old_eaveHeight = vs.GetRoofEdge(roof_h, index)
+                index = index + 1  # Vectorworks uses 1-based indexing
+                
+                # Get roof edge info
+                result = vs.GetRoofEdge(roof_h, index)
+                if not result or len(result) < 5:
+                    raise ValueError(f"Failed to get roof edge data for index {index}")
+                
+                bool_success, old_vertexPt, old_slope, old_overhang, old_eaveHeight = result
+                
+                if not bool_success:
+                    raise ValueError(f"GetRoofEdge failed for index {index}")
+                
                 old_eaveHeight_original_list.append(old_eaveHeight)
-                if slope:
+                
+                # Update slope if provided
+                if slope is not None:
                     old_slope = slope
-                if eave_overhang:
+                
+                # Update overhang if provided
+                if eave_overhang is not None:
                     old_overhang = eave_overhang
-                if eave_height:
-                    # looks like when setting the eave height, should consider the layer elevation
+                
+                # Update eave height if provided
+                if eave_height is not None:
+                    # Consider the layer elevation
                     layer_h = vs.GetParent(roof_h)
+                    if not layer_h:
+                        raise ValueError("Could not get parent layer of roof")
+                    
                     base_eleva, thickness = vs.GetLayerElevation(layer_h)
                     old_eaveHeight = eave_height + base_eleva + thickness
+                
+                # Set the updated roof edge
                 vs.SetRoofEdge(roof_h, index, old_vertexPt, old_slope, old_overhang, old_eaveHeight)
             
-            if eave_height:
+            # Handle eave height changes (only if we have vertices)
+            if eave_height is not None and old_eaveHeight_original_list:
                 old_eaveHeight_original = old_eaveHeight_original_list[0]
-                # also set the roof slab height outside the loop
+                
+                # Set the roof slab height
                 ok, roof_slab_uuid, iType = vs.IFC_GetEntityProp(roof_h, 'Tag')
-                roof_slab_h = vs.GetObjectByUuid(roof_slab_uuid)
-                # this formula seems be correct, but weird
-                # so to get the right z offset of the slab on the layer, need to input new_height(the Z off value want to ser) + base_eleva_of_layer - old_height_of_slab(the old Z off value of the slab)
-                vs.SetSlabHeight(roof_slab_h, eave_height + base_eleva + thickness - old_eaveHeight_original)
-                vs.ResetObject(roof_slab_h)
+                if ok and roof_slab_uuid:
+                    roof_slab_h = vs.GetObjectByUuid(roof_slab_uuid)
+                    if roof_slab_h:
+                        layer_h = vs.GetParent(roof_h)
+                        base_eleva, thickness = vs.GetLayerElevation(layer_h)
+                        
+                        # Calculate new slab height
+                        new_slab_height = eave_height + base_eleva + thickness - old_eaveHeight_original
+                        vs.SetSlabHeight(roof_slab_h, new_slab_height)
+                        vs.ResetObject(roof_slab_h)
+                    else:
+                        print(f"Warning: Could not find roof slab object with UUID: {roof_slab_uuid}")
+                else:
+                    print("Warning: Could not get roof slab UUID from IFC properties")
         
-            if roof_thickness:
-                bool_roof, genGableWall, bearingInset, roofThick, miterType, vertMiter = vs.GetRoofAttributes(roof_h)
-                vs.SetRoofAttributes(roof_h, genGableWall, bearingInset, roof_thickness, miterType, vertMiter)
+            # Handle roof thickness changes
+            if roof_thickness is not None:
+                roof_attrs = vs.GetRoofAttributes(roof_h)
+                if roof_attrs and len(roof_attrs) >= 6:
+                    bool_roof, genGableWall, bearingInset, roofThick, miterType, vertMiter = roof_attrs
+                    if bool_roof:
+                        vs.SetRoofAttributes(roof_h, genGableWall, bearingInset, roof_thickness, miterType, vertMiter)
+                    else:
+                        raise ValueError("GetRoofAttributes returned False")
+                else:
+                    raise ValueError("Failed to get roof attributes")
             
             return roof_id
+            
         except Exception as e:
-            raise ValueError(f"Error occured during setting roof attributes: {e}")
+            raise ValueError(f"Error occurred during setting roof attributes for {roof_id}: {e}")
 
 class SetRoofStyle(Tool):
     name = "set_pitched_roof_style"
