@@ -7,6 +7,12 @@ from xml.dom import minidom
 import xml.etree.ElementTree as ET
 import zipfile
 import ifcopenshell
+import stat
+
+
+def on_rm_error(func, path, exc_info):
+    os.chmod(path, stat.S_IWRITE)
+    func(path)
 
 # config the solibri autorun workflow xml file
 def set_xml_path(workflow_path, 
@@ -90,7 +96,7 @@ def process_bcf_report(bcf_report_path, new_ifc_path):
     with zipfile.ZipFile(bcf_report_path, 'r') as zip_ref:
         folder_path = bcf_report_path.split(".")[0]
         if os.path.exists(folder_path):
-            shutil.rmtree(folder_path)
+            shutil.rmtree(folder_path, onerror=on_rm_error)
 
         zip_ref.extractall(folder_path)
     # traverse all issues

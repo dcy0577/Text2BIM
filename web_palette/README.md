@@ -45,7 +45,17 @@ This plugin is developed based on https://github.com/VectorworksDeveloper/SDKExa
 
 ## Getting started
 
-Create a shortcut of folder `web_palette\Palette`. Move it to `C:\Program Files\Vectorworks 2024\Plug-Ins` so that Vectorworks will automatically find the plugin at startup.
-The plugin can be found in Windows>Palattes>Web Palettes>Text2BIM in Vectorworks.
+Create a shortcut of folder `web_palette\Palette2024` or `web_palette\Palette2025`. Move it to `C:\Program Files\Vectorworks 2024\Plug-Ins` or `C:\Program Files\Vectorworks 2025\Plug-Ins`so that Vectorworks will automatically find the plugin at startup.
+
+In Vectorworks 2024, the plugin can be found in `Windows>Palattes>Web Palettes>Text2BIM`.
+
+In Vectorworks 2025, there was a significant change: web palettes are no longer automatically added under the Window menu. Instead, we will have a menu command, that can be added to the Workspace which will show our web-palette.
+1. Add the Menu Command to Your Workspace:
+Go to Tools > Workspaces > Edit Current Workspace
+In the Workspace Editor, find `Text2BIM` (it should be under the AEC category).
+Drag it to a menu where you want it to be placed in (e.g., AEC, Tools).
+Click OK to save the workspace.
+
+2. Once added to your workspace, you can open the palette by clicking the menu command you added.
 
 ![software architecture](software_architect.png)
